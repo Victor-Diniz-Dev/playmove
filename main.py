@@ -26,6 +26,19 @@ def mover_canvas():
     y = player["y"] * PASSO
     canvas.coords(personagem, x, y, x + PASSO, y + PASSO)
 
+def desenhar_grade():
+    for y in range(ALTURA):
+        for x in range(LARGURA):
+            canvas.create_rectangle(
+                x * PASSO,
+                y * PASSO,
+                (x + 1) * PASSO,
+                (y + 1) * PASSO,
+                outline="gray",  # cor da linha da grade
+                fill="white"
+            )
+
+
 def on_keypress(event):
     tecla = event.keysym.lower()
     walk(tecla)
@@ -35,6 +48,8 @@ janela.title("Movimento do Personagem")
 
 canvas = tk.Canvas(janela, width=LARGURA*PASSO, height=ALTURA*PASSO, bg="white")
 canvas.pack()
+
+desenhar_grade()
 
 personagem = canvas.create_rectangle(0, 0, PASSO, PASSO, fill="blue")
 
