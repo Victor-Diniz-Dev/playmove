@@ -1,5 +1,6 @@
 import tkinter as tk
 from tkinter import messagebox
+import random
 
 
 # Tamanho do "mapa"
@@ -9,6 +10,8 @@ PASSO = 40  # Tamanho de cada bloco (em pixels)
 
 
 player = {"x": 0, "y": 0}
+
+inimigo = {"x": 15, "y": 8}
 
 paredes = [
     (3, 3), (3, 4), (3, 5), (4, 6), (5, 3), (5, 4), (5, 5),
@@ -46,6 +49,7 @@ def walk(direction):
 
     if (player["x"], player["y"]) == objetivo:
         messagebox.showinfo("Vitória!", "Parabéns, você venceu!")
+        janela.destroy()
 
 def mover_canvas():
     x = player["x"] * PASSO
@@ -86,6 +90,39 @@ def on_keypress(event):
     tecla = event.keysym.lower()
     walk(tecla)
 
+def mover_inimigo():
+    direcoes = ["w", "a", "s", "d"]
+    direcao = random.choice(direcoes)
+
+    dx, dy = 0, 0
+    if direcao == "w": dy = -1
+    elif direcao == "s": dy = 1
+    elif direcao == "a": dx = -1
+    elif direcao == "d": dx = 1
+
+    novo_x = inimigo["x"] + dx
+    novo_y = inimigo["y"] + dy
+
+    if (0 <= novo_x < LARGURA and 0 <= novo_y < ALTURA and (novo_x, novo_y) not in paredes):
+        inimigo["x"] = novo_x
+        inimigo["y"] = novo_y
+        canvas.coords(
+            inimigo_sprite,
+            inimigo["x"] * PASSO, inimigo["y"] * PASSO,
+            (inimigo["x"] + 1) * PASSO, (inimigo["y"] + 1) * PASSO
+        )
+
+    verificar_colisao()
+
+    # Chama de novo em 500ms
+    janela.after(200, mover_inimigo)
+
+def verificar_colisao():
+    if player["x"] == inimigo["x"] and player["y"] == inimigo["y"]:
+        messagebox.showerror("Game Over", "Você é um perdedor!")
+        janela.destroy()
+
+
 janela = tk.Tk()
 janela.title("PlayMove")
 
@@ -96,6 +133,13 @@ desenhar_grade()
 
 personagem = canvas.create_rectangle(0, 0, PASSO, PASSO, fill="blue")
 
+inimigo_sprite = canvas.create_rectangle(
+    inimigo["x"] * PASSO, inimigo["y"] * PASSO,
+    (inimigo["x"] + 1) * PASSO, (inimigo["y"] + 1) * PASSO,
+    fill="red"
+)
+
 janela.bind("<Key>", on_keypress)
 
+mover_inimigo()
 janela.mainloop()
