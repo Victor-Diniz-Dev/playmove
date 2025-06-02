@@ -123,6 +123,14 @@ def mover_inimigo():
             0 <= novo_y < ALTURA and
             (novo_x, novo_y) not in paredes
         ):
+            # Verifica se o movimento é diagonal
+            if dx != 0 and dy != 0:
+                # Se for, impede se houver parede na horizontal ou vertical adjacente
+                if ((inimigo["x"] + dx, inimigo["y"]) in paredes or
+                    (inimigo["x"], inimigo["y"] + dy) in paredes):
+                    continue  # Pula para a próxima direção
+
+            # Movimento permitido
             inimigo["x"] = novo_x
             inimigo["y"] = novo_y
             canvas.coords(
@@ -132,8 +140,10 @@ def mover_inimigo():
             )
             break
 
+
+
     verificar_colisao()
-    janela.after(350, mover_inimigo)
+    janela.after(250, mover_inimigo)
 
 
 def verificar_colisao():
@@ -160,5 +170,15 @@ inimigo_sprite = canvas.create_rectangle(
 
 janela.bind("<Key>", on_keypress)
 
-mover_inimigo()
+def iniciar_jogo():
+    mover_inimigo()
+
+def mostrar_boas_vindas():
+    messagebox.showinfo("Bem-vindo!", "Pressione OK para iniciar o jogo.")
+    janela.focus_force()
+    iniciar_jogo()
+
+# Espera a janela carregar antes de mostrar a messagebox
+janela.after(100, mostrar_boas_vindas)
+
 janela.mainloop()
