@@ -4,30 +4,34 @@ import random
 
 
 # Tamanho do "mapa"
-LARGURA = 30
-ALTURA = 10
+LARGURA = 43
+ALTURA = 25
 PASSO = 40  # Tamanho de cada bloco (em pixels)
 
 
-player = {"x": 0, "y": 0}
+player = {"x": 1, "y": 1}
 
 inimigo = {"x": 15, "y": 8}
 
 paredes = [
-    (3, 3), (3, 4), (3, 5), (4, 6), (5, 3), (5, 4), (5, 5),
+    # Moldura
+    *[(x, 0) for x in range(43)],
+    *[(x, 24) for x in range(43)],
+    *[(0, y) for y in range(25)],
+    *[(42, y) for y in range(25)],
 
-    (7, 3), (7, 4), (7, 5), (7, 6),
-     
-    (9, 3), (9, 4), (9, 5), (9, 6), (10, 3), (10, 6), (11, 3), (11, 6),
+    # Paredes horizontais internas
+    *[(x, 5) for x in range(2, 41) if x % 3 != 0],
+    *[(x, 10) for x in range(1, 42) if x % 4 != 0],
+    *[(x, 15) for x in range(2, 41) if x % 5 != 0],
 
-    (13, 3), (14, 3), (14, 4), (14, 5), (14, 6), (15, 3),
-
-    (17, 3), (17, 4), (17, 5), (17, 6), (18, 3), (18, 6), (19, 3), (19, 4), (19, 5), (19, 6),
-
-    (21, 3), (21, 4), (21, 5), (21, 6), (22, 3), (22, 5), (23, 3), (23, 4), (23, 6)
+    # Paredes verticais internas
+    *[(5, y) for y in range(2, 22) if y % 3 != 0],
+    *[(15, y) for y in range(3, 20) if y % 4 != 0],
+    *[(30, y) for y in range(1, 24) if y % 5 != 0]
 ]
 
-objetivo = (29, 9)  # canto inferior direito
+objetivo = (31, 4)  # canto inferior direito
 
 def walk(direction):
     novo_x = player["x"]
@@ -73,8 +77,9 @@ def desenhar_grade():
         canvas.create_rectangle(
             px * PASSO, py * PASSO,
             (px + 1) * PASSO, (py + 1) * PASSO,
-            fill="black"
+            fill="#4B4B4B", outline="black"
         )
+
 
         # Desenhar o objetivo
     ox, oy = objetivo
@@ -143,7 +148,7 @@ def mover_inimigo():
 
 
     verificar_colisao()
-    janela.after(250, mover_inimigo)
+    janela.after(200, mover_inimigo)
 
 
 def verificar_colisao():
@@ -153,7 +158,7 @@ def verificar_colisao():
 
 
 janela = tk.Tk()
-janela.title("PlayMove")
+janela.title("playmove")
 
 canvas = tk.Canvas(janela, width=LARGURA*PASSO, height=ALTURA*PASSO, bg="white")
 canvas.pack()
