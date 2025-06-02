@@ -91,31 +91,50 @@ def on_keypress(event):
     walk(tecla)
 
 def mover_inimigo():
-    direcoes = ["w", "a", "s", "d"]
-    direcao = random.choice(direcoes)
+    dx = dy = 0
+    dist_x = abs(inimigo["x"] - player["x"])
+    dist_y = abs(inimigo["y"] - player["y"])
 
-    dx, dy = 0, 0
-    if direcao == "w": dy = -1
-    elif direcao == "s": dy = 1
-    elif direcao == "a": dx = -1
-    elif direcao == "d": dx = 1
+    # Decide prioridade com base na maior distância
+    if dist_x > dist_y:
+        direcoes_preferidas = [
+            (1 if inimigo["x"] < player["x"] else -1, 0),  # mover no eixo X
+            (0, 1 if inimigo["y"] < player["y"] else -1),  # depois no eixo Y
+        ]
+    else:
+        direcoes_preferidas = [
+            (0, 1 if inimigo["y"] < player["y"] else -1),  # mover no eixo Y
+            (1 if inimigo["x"] < player["x"] else -1, 0),  # depois no eixo X
+        ]
 
-    novo_x = inimigo["x"] + dx
-    novo_y = inimigo["y"] + dy
+    # Adiciona tentativas diagonais e reversas como último recurso
+    direcoes_preferidas += [
+        (1 if inimigo["x"] < player["x"] else -1, 1 if inimigo["y"] < player["y"] else -1),
+        (-direcoes_preferidas[0][0], 0),
+        (0, -direcoes_preferidas[1][1])
+    ]
 
-    if (0 <= novo_x < LARGURA and 0 <= novo_y < ALTURA and (novo_x, novo_y) not in paredes):
-        inimigo["x"] = novo_x
-        inimigo["y"] = novo_y
-        canvas.coords(
-            inimigo_sprite,
-            inimigo["x"] * PASSO, inimigo["y"] * PASSO,
-            (inimigo["x"] + 1) * PASSO, (inimigo["y"] + 1) * PASSO
-        )
+    for dx, dy in direcoes_preferidas:
+        novo_x = inimigo["x"] + dx
+        novo_y = inimigo["y"] + dy
+
+        if (
+            0 <= novo_x < LARGURA and
+            0 <= novo_y < ALTURA and
+            (novo_x, novo_y) not in paredes
+        ):
+            inimigo["x"] = novo_x
+            inimigo["y"] = novo_y
+            canvas.coords(
+                inimigo_sprite,
+                inimigo["x"] * PASSO, inimigo["y"] * PASSO,
+                (inimigo["x"] + 1) * PASSO, (inimigo["y"] + 1) * PASSO
+            )
+            break
 
     verificar_colisao()
+    janela.after(350, mover_inimigo)
 
-    # Chama de novo em 500ms
-    janela.after(200, mover_inimigo)
 
 def verificar_colisao():
     if player["x"] == inimigo["x"] and player["y"] == inimigo["y"]:
